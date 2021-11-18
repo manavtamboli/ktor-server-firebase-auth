@@ -1,3 +1,5 @@
+@file:Suppress("unused", "MemberVisibilityCanBePrivate")
+
 package com.manavtamboli
 
 import com.google.firebase.FirebaseApp
@@ -11,6 +13,9 @@ import io.ktor.http.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 
+/**
+ * Plugin that checks whether the requests are authorized with the Firebase IdToken or not.
+ * */
 class FirebaseAuthentication(configuration: Configuration) {
 
     private val auth = FirebaseAuth.getInstance(configuration.firebaseApp ?: FirebaseApp.getInstance())
@@ -113,6 +118,9 @@ class FirebaseAuthentication(configuration: Configuration) {
         object InvalidFirebaseApp : FailureReason()
     }
 
+    /**
+     * Plugin that checks whether the requests are authorized with the Firebase IdToken or not.
+     * */
     companion object : ApplicationFeature<ApplicationCallPipeline, Configuration, FirebaseAuthentication> {
 
         internal val FailureReasonKey : AttributeKey<FailureReason> = AttributeKey("FirebaseAuthenticationFailureReasonKey")
@@ -133,10 +141,12 @@ class FirebaseAuthentication(configuration: Configuration) {
 
 /**
  * Extension function for [ApplicationCall] which gets the decoded token (if a valid token was present, or null) from the attributes.
+ * If this returns null, there is a guaranteed non null [FirebaseAuthentication.FailureReason].
  * */
-fun ApplicationCall.getDecodedToken() : FirebaseToken? = attributes.getOrNull(DecodedTokenKey)
+fun ApplicationCall.getDecodedToken() : FirebaseToken? = attributes.getOrNull(DecodedTokenKey).also { Result }
 
 /**
  * Extension function for [ApplicationCall] which gets the failure reason if no valid token was found.
+ * If this returns null, there is a guaranteed successful decoded [FirebaseToken].
  * */
 fun ApplicationCall.getFailureReason() : FirebaseAuthentication.FailureReason? = attributes.getOrNull(FailureReasonKey)

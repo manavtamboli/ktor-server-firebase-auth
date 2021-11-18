@@ -22,6 +22,7 @@ fun Application.configureApplication(){
 
     // Configure FirebaseAuthentication
     install(FirebaseAuthentication) {
+
         // Sets the FirebaseApp instance to verify tokens.
         // If not specified, default FirebaseApp instance will be used.
         firebaseApp = FirebaseApp.getInstance()
@@ -40,9 +41,15 @@ fun Application.configureApplication(){
         get("/test"){
             val decodedToken = call.getDecodedToken()
             if (decodedToken == null){
-                call.respond(HttpStatusCode.Unauthorized)
+                val status = when (call.getFailureReason()){
+                    FirebaseAuthentication.FailureReason.InvalidFirebaseApp -> HttpStatusCode.InternalServerError
+                    FirebaseAuthentication.FailureReason.TokenInvalid -> HttpStatusCode.Unauthorized
+                    FirebaseAuthentication.FailureReason.TokenNullOrBlank -> HttpStatusCode.BadRequest
+                    null -> throw RuntimeException() // This can never occur, as decodedToken is null.
+                }
+                call.respond(status)
             } else {
-                call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK, decodedToken.uid)
             }
         }
     }
