@@ -29,7 +29,7 @@ fun Application.configureApplication(){
 
         // Sets the authorization type used in the requests.
         // Default is AuthorizationType.Bearer
-        authorizationType = AuthorizationType.Bearer
+        authorizationType = AuthorizationType.Parameter("token")
 
         // Sets whether to check if the tokens were revoked or if the user is disabled.
         // Defaults to false.
